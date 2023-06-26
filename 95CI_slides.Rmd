@@ -1,0 +1,167 @@
+---
+title: "95% Confidence Intervals"
+subtitle: "Introduction to Statistical Methods (PALS0046)\ngithub.com/sdparsons/"
+author: "Sam Parsons"
+date: "25/06/2023"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 95% Confidence Intervals
+
+95 % confidence is a confidence that in the long-run 95 % of the CIs will include the population mean
+
+95\%CI = point estimate +/- critical value*standard error
+
+
+```{r CI fig, echo = FALSE, message = FALSE, warning=FALSE, fig.show='asis', results='hold'}
+trees <- datasets::trees
+
+# simulate population level data
+pop_level <- rnorm(n = 100000, 
+                   mean = mean(trees$Height), 
+                   sd(trees$Height))
+
+# check summary statistics
+mean(pop_level)
+sd(pop_level)
+
+# take 20 samples
+n_samples <- 20
+sample_size <- 20
+
+sample_heights <- NULL
+
+for(i in 1:n_samples) {
+  sample_temp <- sample(pop_level, sample_size, replace = TRUE)
+  sample_heights <- c(sample_heights, sample_temp)
+}
+
+sample_data <- data.frame(sample = rep(1:n_samples, each = sample_size),
+                          heights = sample_heights)
+
+library(ggplot2)
+library(dplyr)
+sample_data %>%
+  group_by(sample) %>%
+  summarise(mean = mean(heights),
+            se = sd(heights)/sqrt(n())) %>%
+  mutate(lowerCI = mean + (qnorm(.025) * se),
+         upperCI = mean + (qnorm(.975) * se)) %>%
+  ggplot(aes(x = sample,
+             y = mean)) +
+  geom_point() +
+  geom_abline(intercept = mean(pop_level), slope = 0, colour = "red", linewidth = 1.1) +
+  geom_errorbar(aes(ymin = lowerCI,
+                ymax = upperCI)) +
+  coord_cartesian(ylim = c(68, 83))
+
+
+
+```
+
+## What the 95% CI is not
+
+the chance the true value falls within your CI
+
+```{r CI fig2, echo = FALSE, message = FALSE, warning=FALSE, fig.show='asis', results='hold', out.height="40%"}
+sample_data %>%
+  group_by(sample) %>%
+  filter(sample == 12) %>%
+  summarise(mean = mean(heights),
+            se = sd(heights)/sqrt(n())) %>%
+  mutate(lowerCI = mean + (qnorm(.025) * se),
+         upperCI = mean + (qnorm(.975) * se)) %>%
+  ggplot(aes(x = sample,
+             y = mean)) +
+  geom_point() +
+  geom_abline(intercept = mean(pop_level), slope = 0, colour = "red", linewidth = 1.1) +
+  geom_errorbar(aes(ymin = lowerCI,
+                ymax = upperCI),
+                width = .1) +
+  coord_cartesian(xlim = c(11.7, 12.3), ylim = c(68, 83))
+
+```
+
+(we will discuss a bunch of weird statistical things this term, stay tuned)
+
+
+## How tall are our trees
+
+
+```{r data}
+trees <- datasets::trees
+
+head(trees)
+
+```
+
+## Plotting tree height
+
+```{r hist}
+hist(trees$Height)
+```
+
+## 95%CI of the mean
+
+
+
+```{r ci of mean}
+mean(trees$Height)
+
+sd(trees$Height)
+
+se = sd(trees$Height) / sqrt(nrow(trees))
+
+se
+
+```
+
+## 95%CI of the mean
+
+95\%CI = point estimate +/- critical value*standard error
+
+lower and upper critical values
+
+```{r}
+qnorm(c(.025,.975))
+```
+
+```{r}
+mean(trees$Height) + qnorm(.025) * se
+mean(trees$Height) + qnorm(.975) * se
+
+```
+
+## Bootstraped Confidence Intervals
+
+Some statistics are more complex, we may not have a closed-form equation
+
+Bootstrapping involves taking lots of random samples from your data
+
+For each re-sample, you calculate your statistic
+
+Then, you compile the whole distribution to extract the confidence intervals
+
+In this example we're interested in the mean tree BMI, for reasons
+
+
+
+
+
+## Exercises
+
+- calculate 90% CIs for tree height. How do the 90% and 95% CIs differ? what does this mean?
+- calculate 95% CIs for tree girth (diameter) and volume
+
+*bootstrapping exercises*
+
+- calculate bootstrapped CIs for tree height
+- plot the bootstrapped CIs (check github code for hints)
+
+
+
+
