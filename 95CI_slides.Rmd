@@ -1,6 +1,6 @@
 ---
 title: "95% Confidence Intervals"
-subtitle: "Introduction to Statistical Methods (PALS0046)\ngithub.com/sdparsons/"
+subtitle: "Introduction to Statistical Methods (PALS0046)\ngithub.com/sdparsons/95CI_class"
 author: "Sam Parsons"
 date: "25/06/2023"
 output: ioslides_presentation
@@ -12,12 +12,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 95% Confidence Intervals
 
-95 % confidence is a confidence that in the long-run 95 % of the CIs will include the population mean
-
-95\%CI = point estimate +/- critical value*standard error
+95 % confidence is a confidence that in the long-run 95 % of the CIs will include the true population value
 
 
-```{r CI fig, echo = FALSE, message = FALSE, warning=FALSE, fig.show='asis', results='hold'}
+```{r CI fig, echo = FALSE, message = FALSE, warning=FALSE, results='hold', include = FALSE}
 trees <- datasets::trees
 
 # simulate population level data
@@ -43,6 +41,10 @@ for(i in 1:n_samples) {
 sample_data <- data.frame(sample = rep(1:n_samples, each = sample_size),
                           heights = sample_heights)
 
+```
+
+```{r plot CIS, echo = FALSE, message = FALSE, warning=FALSE, fig.height=4, fig.align='center'}
+
 library(ggplot2)
 library(dplyr)
 sample_data %>%
@@ -67,7 +69,7 @@ sample_data %>%
 
 the chance the true value falls within your CI
 
-```{r CI fig2, echo = FALSE, message = FALSE, warning=FALSE, fig.show='asis', results='hold', out.height="40%"}
+```{r CI fig2, echo = FALSE, message = FALSE, warning=FALSE, results='hold', fig.height=4, fig.align='center'}
 sample_data %>%
   group_by(sample) %>%
   filter(sample == 12) %>%
@@ -86,11 +88,12 @@ sample_data %>%
 
 ```
 
-(we will discuss a bunch of weird statistical things this term, stay tuned)
+(we'll discuss a ton of odd statistical things this term, stay tuned)
 
 
-## How tall are our trees
+## How tall are our trees?
 
+Today, we're expressing all our love for the trees
 
 ```{r data}
 trees <- datasets::trees
@@ -136,6 +139,10 @@ mean(trees$Height) + qnorm(.975) * se
 
 ```
 
+## reporting
+
+mean tree height was `r mean(trees$Height)` metres, 95% CI [`r round(mean(trees$Height) + qnorm(.025) * se, 2)`, `r round(mean(trees$Height) + qnorm(.975) * se, 2)`]
+
 ## Bootstraped Confidence Intervals
 
 Some statistics are more complex, we may not have a closed-form equation
@@ -148,20 +155,55 @@ Then, you compile the whole distribution to extract the confidence intervals
 
 In this example we're interested in the mean tree BMI, for reasons
 
+##
+
+```{r bootstrapped_example, echo = FALSE, message = FALSE, warning=FALSE, results='hold', fig.height=5, fig.align='center'}
+# fetch data
+trees <- datasets::trees
+
+# tree BMI
+tree_BMI <- trees$Volume / sqrt(trees$Height)
+
+# create an empty dataset
+sample_BMIs <- NULL
+
+for(i in 1:2000) {
+  
+  sample_temp <- mean(sample(tree_BMI, replace = TRUE))
+  
+  sample_BMIs <- c(sample_BMIs, sample_temp)
+}
+
+# plot distribution of bootstrapped samples
+as.data.frame(sample_BMIs) %>%
+  ggplot(aes(x = sample_BMIs)) +
+  geom_histogram() +
+  labs(x = "sample BMI", y = "Frequency") +
+  geom_vline(xintercept = mean(sample_BMIs)) + # mean
+  geom_vline(xintercept = quantile(sample_BMIs, .025)) + # lower CI
+  geom_vline(xintercept = quantile(sample_BMIs, .975)) + # upper CI
+  geom_label(aes(x = mean(sample_BMIs), y = 30, label = "Mean")) +
+  geom_label(aes(x = quantile(sample_BMIs, .025), y = 30, label = "lower 95% CI")) +
+  geom_label(aes(x = quantile(sample_BMIs, .975), y = 30, label = "upper 95% CI"))
 
 
+```
 
 
 ## Exercises
 
-- calculate 90% CIs for tree height. How do the 90% and 95% CIs differ? what does this mean?
+reminder, class code here: github.com/sdparsons/95CI_class 
+
 - calculate 95% CIs for tree girth (diameter) and volume
+- calculate 90% CIs for tree height. How do the 90% and 95% CIs differ? discuss what this means?
 
 *bootstrapping exercises*
 
 - calculate bootstrapped CIs for tree height
 - plot the bootstrapped CIs (check github code for hints)
 
+*advanced*
 
+- find another dataset using the "datasets" package, calculate CIs and bootstrapped CIs for a statistic of your choice
 
 
