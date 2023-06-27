@@ -17,7 +17,7 @@ sample(tree_BMI, replace = TRUE)
 # create an empty dataset
 sample_BMIs <- NULL
 
-for(i in 1:20) {
+for(i in 1:100) {
   
   sample_temp <- mean(sample(tree_BMI, replace = TRUE))
   
@@ -42,7 +42,4 @@ as.data.frame(sample_BMIs) %>%
   labs(x = "sample BMI", y = "Frequency") +
   geom_vline(xintercept = mean(sample_BMIs)) + # mean
   geom_vline(xintercept = quantile(sample_BMIs, .025)) + # lower CI
-  geom_vline(xintercept = quantile(sample_BMIs, .975)) + # upper CI
-  geom_label(aes(x = mean(sample_BMIs), y = 30, label = "Mean")) +
-  geom_label(aes(x = quantile(sample_BMIs, .025), y = 30, label = "lower 95% CI")) +
-  geom_label(aes(x = quantile(sample_BMIs, .975), y = 30, label = "upper 95% CI"))
+  geom_vline(xintercept = quantile(sample_BMIs, .975)) # upper CI
